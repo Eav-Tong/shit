@@ -252,6 +252,114 @@
             animation: slideUp 0.3s ease;
         }
 
+        .modal-content.modal-large {
+            max-width: 600px;
+        }
+
+        .chat-container {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .chat-message.user .chat-avatar {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .chat-message.bot .chat-avatar {
+            background: #2196F3;
+            color: white;
+        }
+
+        .chat-content {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 15px;
+            background: white;
+            margin: 0 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .chat-message.user .chat-content {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .chat-message.bot .chat-content {
+            background: white;
+        }
+
+        .chat-disclaimer {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #eee;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #4CAF50;
+        }
+
+        .api-key-setup {
+            display: flex;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .api-key-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -719,25 +827,20 @@
                     <h3>学宠陪伴</h3>
                     <p>切换风格，智能互动</p>
                 </div>
-                <div class="function-card" onclick="openDecisionModal()">
-                    <div class="icon icon-decision">🎁</div>
-                    <h3>决策盒子</h3>
-                    <p>随机决策，烦躁时解闷</p>
-                </div>
-                <div class="function-card" onclick="openMoodModal()">
+                <div class="function-card" onclick="openAIModal()">
                     <div class="icon icon-mood">💭</div>
-                    <h3>情绪树洞</h3>
-                    <p>倾诉心声，情绪识别</p>
+                    <h3>学宠对话</h3>
+                    <p>情感陪伴，智能问答</p>
                 </div>
                 <div class="function-card" onclick="openCheckinModal()">
                     <div class="icon icon-checkin">✅</div>
                     <h3>每日打卡</h3>
                     <p>绑定计划，积累奖励</p>
                 </div>
-                <div class="function-card" onclick="openGuideModal()">
-                    <div class="icon icon-guide">💝</div>
-                    <h3>情绪引导</h3>
-                    <p>认知调节，缓解焦虑</p>
+                <div class="function-card" onclick="openDecisionModal()">
+                    <div class="icon icon-decision">🎁</div>
+                    <h3>决策盒子</h3>
+                    <p>随机决策，烦躁时解闷</p>
                 </div>
             </div>
 
@@ -752,16 +855,6 @@
                     <div class="icon icon-countdown">📅</div>
                     <h3>考研倒计时</h3>
                     <p>每日播报剩余天数</p>
-                </div>
-                <div class="function-card">
-                    <div class="icon icon-decision">👯</div>
-                    <h3>考友互动</h3>
-                    <p>串门互赞，送鼓励</p>
-                </div>
-                <div class="function-card">
-                    <div class="icon icon-mood">📚</div>
-                    <h3>知识点抽背</h3>
-                    <p>导入清单随机抽背</p>
                 </div>
             </div>
         </div>
@@ -861,22 +954,6 @@
         </div>
     </div>
 
-    <!-- 情绪树洞 Modal -->
-    <div class="modal" id="moodModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>💭 情绪树洞</h2>
-                <button class="close-btn" onclick="closeModal('moodModal')">×</button>
-            </div>
-            <div class="modal-body">
-                <textarea class="mood-input" id="moodInput" placeholder="今天有什么想说的吗？可以把心事告诉我～"></textarea>
-                <button class="btn btn-primary" style="width:100%" onclick="analyzeMood()">记录情绪</button>
-                <div class="mood-result" id="moodResult"></div>
-                <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="clearMood()">清空记录</button>
-            </div>
-        </div>
-    </div>
-
     <!-- 每日打卡 Modal -->
     <div class="modal" id="checkinModal">
         <div class="modal-content">
@@ -892,25 +969,18 @@
         </div>
     </div>
 
-    <!-- 情绪引导 Modal -->
-    <div class="modal" id="guideModal">
-        <div class="modal-content">
+    <!-- 学宠对话 Modal -->
+    <div class="modal" id="aiModal">
+        <div class="modal-content modal-large">
             <div class="modal-header">
-                <h2>💝 情绪引导</h2>
-                <button class="close-btn" onclick="closeModal('guideModal')">×</button>
+                <h2>🐱 学宠对话</h2>
+                <button class="close-btn" onclick="closeModal('aiModal')">×</button>
             </div>
             <div class="modal-body">
-                <div class="emotion-guide">
-                    <h3>🌈 认知调节话术</h3>
-                    <p>焦虑是因为你在乎，紧张是因为你想做得更好。这说明你在正确的道路上前进！</p>
-                </div>
-                <div class="section-title">💪 自我鼓励</div>
-                <div class="encourage-phrases">
-                    <span class="phrase-tag" onclick="showPhrase('我已经很棒了！')">我已经很棒了</span>
-                    <span class="phrase-tag" onclick="showPhrase('每一天都在进步！')">每一天都在进步</span>
-                    <span class="phrase-tag" onclick="showPhrase('坚持就是胜利！')">坚持就是胜利</span>
-                    <span class="phrase-tag" onclick="showPhrase('相信自己可以的！')">相信自己</span>
-                    <span class="phrase-tag" onclick="showPhrase('努力不会被辜负！')">努力不被辜负</span>
+                <div class="chat-container" id="chatContainer"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="和学宠聊聊..." onkeypress="handleChatKeypress(event)">
+                    <button class="btn btn-primary" onclick="sendMessage()">发送</button>
                 </div>
             </div>
         </div>
@@ -1068,6 +1138,9 @@
 
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
+            if (id === 'aiModal') {
+                document.getElementById('chatContainer').innerHTML = '';
+            }
         }
 
         // ===== 番茄钟功能 =====
@@ -1169,9 +1242,151 @@
         }
 
         function getPetEncourage() {
-            const messages = userData.petStyle === 'gentle' ? gentleMessages : strictMessages;
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            var messages = userData.petStyle === 'gentle' ? gentleMessages : strictMessages;
+            var randomMessage = messages[Math.floor(Math.random() * messages.length)];
             showPetMessage(randomMessage);
+        }
+
+        // ===== 学宠对话功能 =====
+        var chatHistory = [];
+        
+        function getPetEmoji() {
+            var style = userData.petStyle || 'gentle';
+            var emojis = { gentle: '🐱', strict: '🐼', cute: '🐰', cool: '🦊' };
+            return emojis[style] || '🐱';
+        }
+        
+        function openAIModal() {
+            openModal('aiModal');
+            var container = document.getElementById('chatContainer');
+            if (container.children.length === 0) {
+                var savedHistory = localStorage.getItem('chatHistory_' + userId);
+                if (savedHistory) {
+                    chatHistory = JSON.parse(savedHistory);
+                    chatHistory.forEach(function(msg) {
+                        addChatMessage(msg.content, msg.role === 'user' ? 'user' : 'bot');
+                    });
+                } else {
+                    var welcomeMsg = '你好！我是' + (userData.petName || '小考研') + '，你的考研陪伴学宠～有什么心事都可以告诉我哦！';
+                    addChatMessage(welcomeMsg, 'bot');
+                    chatHistory.push({ role: 'assistant', content: welcomeMsg });
+                }
+            }
+        }
+        
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendMessage() {
+            var input = document.getElementById('chatInput');
+            var message = input.value.trim();
+            if (!message) return;
+            
+            addChatMessage(message, 'user');
+            chatHistory.push({ role: 'user', content: message });
+            input.value = '';
+            
+            var loadingMsg = addChatMessage('正在思考中...', 'bot');
+            
+            callDeepSeekAPI(message, function(response) {
+                loadingMsg.remove();
+                addChatMessage(response, 'bot');
+                chatHistory.push({ role: 'assistant', content: response });
+                localStorage.setItem('chatHistory_' + userId, JSON.stringify(chatHistory));
+            });
+        }
+        
+        function addChatMessage(text, type) {
+            var container = document.getElementById('chatContainer');
+            var div = document.createElement('div');
+            div.className = 'chat-message ' + type;
+            var avatarEmoji = type === 'bot' ? getPetEmoji() : '👤';
+            var disclaimer = type === 'bot' ? '<div class="chat-disclaimer">⚠️ AI 生成内容仅供参考，请以实际情况为准</div>' : '';
+            div.innerHTML = '<div class="chat-avatar">' + avatarEmoji + '</div><div class="chat-content">' + text + '</div>' + disclaimer;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div;
+        }
+        
+        function callDeepSeekAPI(message, callback) {
+            fetch('/api/ai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'chat',
+                    messages: chatHistory
+                })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.choices && data.choices[0]) {
+                    var reply = data.choices[0].message.content;
+                    var formattedReply = formatAIMessage(reply);
+                    callback(formattedReply);
+                } else {
+                    callback('抱歉，出了点问题: ' + JSON.stringify(data));
+                }
+            })
+            .catch(function(e) {
+                callback('请求失败: ' + e.message);
+            });
+        }
+        
+        function formatAIMessage(jsonStr) {
+            try {
+                var data = JSON.parse(jsonStr);
+                var d = data;
+                var html = '';
+                
+                if (d.emotion_identification) {
+                    html += '📌 情绪识别\n';
+                    html += '当前情绪：' + d.emotion_identification.current_emotion + '\n';
+                    html += '强度：' + d.emotion_identification.intensity + '\n';
+                    html += '触发原因：' + d.emotion_identification.trigger + '\n\n';
+                }
+                
+                if (d.problem_analysis) {
+                    html += '📌 问题分析\n';
+                    html += '表层问题：' + d.problem_analysis.surface_issue + '\n';
+                    html += '深层原因：' + d.problem_analysis.root_cause + '\n\n';
+                }
+                
+                if (d.suggestions) {
+                    html += '📌 调整建议\n';
+                    if (d.suggestions.short_term && d.suggestions.short_term.length > 0) {
+                        html += '【短期】立刻可执行：\n';
+                        d.suggestions.short_term.forEach(function(item, i) {
+                            html += (i + 1) + '. ' + item + '\n';
+                        });
+                        html += '\n';
+                    }
+                    if (d.suggestions.mid_term && d.suggestions.mid_term.length > 0) {
+                        html += '【中期】1-3天调整：\n';
+                        d.suggestions.mid_term.forEach(function(item, i) {
+                            html += (i + 1) + '. ' + item + '\n';
+                        });
+                    }
+                }
+                
+                if (d.cognitive_reframe) {
+                    html += '\n📌 认知重构\n';
+                    html += '❌ ' + d.cognitive_reframe.irrational_belief + '\n';
+                    html += '✅ ' + d.cognitive_reframe.rational_alternative + '\n\n';
+                }
+                
+                if (d.next_action) {
+                    html += '🎯 下一步行动\n' + d.next_action + '\n';
+                }
+                
+                return html;
+            } catch (e) {
+                return jsonStr;
+            }
         }
 
         function showPetMessage(message) {
@@ -1222,60 +1437,6 @@
             userData.petLevel = calculatePetLevel(userData.growthValue);
             saveData();
             updateStats();
-        }
-
-        // ===== 情绪树洞功能 =====
-        const positiveKeywords = ['开心', '快乐', '高兴', '满足', '兴奋', '惊喜', '激动', '棒', '好', '不错', '顺利'];
-        const negativeKeywords = ['难过', '伤心', '痛苦', '焦虑', '紧张', '害怕', '担心', '烦', '累', '压力', '崩溃', '绝望', '失落'];
-
-        function openMoodModal() {
-            openModal('moodModal');
-            document.getElementById('moodResult').classList.remove('show');
-            document.getElementById('moodInput').value = '';
-        }
-
-        function analyzeMood() {
-            const text = document.getElementById('moodInput').value.trim();
-            if (!text) {
-                showToast('请输入你的心情～');
-                return;
-            }
-            
-            let positiveCount = 0;
-            let negativeCount = 0;
-            
-            positiveKeywords.forEach(k => { if (text.includes(k)) positiveCount++; });
-            negativeKeywords.forEach(k => { if (text.includes(k)) negativeCount++; });
-            
-            const result = document.getElementById('moodResult');
-            result.classList.remove('positive', 'negative', 'neutral');
-            
-            let mood = '';
-            if (positiveCount > negativeCount) {
-                mood = 'positive';
-                result.innerHTML = '<strong>🌸 检测到正面情绪！</strong><br>你的心情看起来很不错呢～继续保持！学宠为你开心！';
-            } else if (negativeCount > positiveCount) {
-                mood = 'negative';
-                result.innerHTML = '<strong>💙 检测到负面情绪</strong><br>我感受到了你的压力和不安。请记住，你不是一个人！考研路上有我陪你～<br><br>建议：休息一下，出去走走，或者来和学宠聊聊～';
-            } else {
-                mood = 'neutral';
-                result.innerHTML = '<strong>💭 情绪记录已保存</strong><br>今天的状态比较平淡呢～无论是怎样的心情，我都会陪伴着你！';
-            }
-            
-            result.classList.add(mood, 'show');
-            
-            userData.moods.push({ text: text, mood: mood, time: new Date().toISOString() });
-            userData.growthValue += 3;
-            
-            saveData();
-            updateStats();
-        }
-
-        function clearMood() {
-            userData.moods = [];
-            saveData();
-            document.getElementById('moodResult').classList.remove('show');
-            showToast('情绪记录已清空～');
         }
 
         // ===== 每日打卡功能 =====
@@ -1351,15 +1512,6 @@
             const d = new Date();
             d.setDate(d.getDate() - 1);
             return d.toISOString().split('T')[0];
-        }
-
-        // ===== 情绪引导功能 =====
-        function openGuideModal() {
-            openModal('guideModal');
-        }
-
-        function showPhrase(phrase) {
-            showToast(phrase + ' ✨');
         }
 
         // 初始化
