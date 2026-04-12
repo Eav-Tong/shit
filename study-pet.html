@@ -1024,6 +1024,13 @@
         }
         
         var userId = getUserId();
+        
+        // 自动检测运行环境
+        var apiBaseUrl = '';
+        var currentUrl = window.location.href;
+        if (currentUrl.indexOf('file://') === 0) {
+            apiBaseUrl = 'http://localhost:3001';
+        }
 
         // 自动创建表（如果不存在）
         function initDatabase() {
@@ -1312,7 +1319,7 @@
         }
         
         function callDeepSeekAPI(message, callback) {
-            fetch('/api/ai', {
+            fetch(apiBaseUrl + '/api/ai', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
