@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考研线上学宠 - 陪伴式学习助手</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d3436;
+            --secondary: #636e72;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --border: #e9ecef;
+            --shadow: 0 4px 20px rgba(108, 92, 231, 0.12);
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --pink: #fd79a8;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--primary);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--bg);
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pet-avatar {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            margin: 20px auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .pet-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .pet-name {
+            font-size: 18px;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pet-level {
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            margin: -20px 20px 20px;
+            position: relative;
+            z-index: 2;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--secondary);
+        }
+
+        .main-content {
+            padding: 0 20px 100px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 25px 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .function-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .function-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .function-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-light);
+        }
+
+        .function-card .icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .function-card h3 {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .function-card p {
+            font-size: 12px;
+            color: var(--secondary);
+        }
+
+        .icon-timer { background: #ffeaa7; }
+        .icon-pet { background: #fab1a0; }
+        .icon-decision { background: #81ecec; }
+        .icon-mood { background: #a29bfe; }
+        .icon-checkin { background: #55efc4; }
+        .icon-guide { background: #fd79a8; }
+        .icon-养成 { background: #74b9ff; }
+        .icon-countdown { background: #ffeaa7; }
+
+        .p1-section {
+            opacity: 0.7;
+        }
+
+        .p1-section .function-card {
+            background: #f8f9fa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .timer-display {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .timer-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent) 0deg, var(--border) 0deg);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .timer-inner {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-time {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .timer-subject {
+            font-size: 14px;
+            color: var(--secondary);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5b4cdb;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .subject-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .subject-tag {
+            padding: 8px 16px;
+            background: var(--bg);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .subject-tag.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .pet-display {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .pet-large {
+            font-size: 80px;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pet-message {
+            background: var(--bg);
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 15px;
+            line-height: 1.6;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .pet-message::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid var(--bg);
+        }
+
+        .style-toggle {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .style-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .style-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .decision-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 15px;
+            resize: none;
+        }
+
+        .decision-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .decision-result {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .decision-result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .decision-result .emoji {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .decision-result .text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .mood-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 15px;
+        }
+
+        .mood-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .mood-result {
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .mood-result.show {
+            display: block;
+        }
+
+        .mood-result.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .mood-result.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .mood-result.neutral {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .checkin-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .checkin-day {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--secondary);
+        }
+
+        .checkin-day.checked {
+            background: var(--success);
+            color: white;
+        }
+
+        .checkin-day.today {
+            border: 2px solid var(--accent);
+        }
+
+        .plan-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 15px;
+        }
+
+        .checkin-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--success), #55efc4);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkin-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .checkin-btn.checked {
+            background: var(--secondary);
+        }
+
+        .emotion-guide {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .emotion-guide h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .emotion-guide p {
+            font-size: 14px;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .encourage-phrases {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .phrase-tag {
+            padding: 10px 15px;
+            background: var(--bg);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .phrase-tag:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            color: var(--secondary);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 3px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            z-index: 200;
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (min-width: 480px) {
+            .app-container {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>考研线上学宠</h1>
+            <p>陪伴式学习，每一天都有进步</p>
+            <div class="pet-avatar" id="petAvatar" onclick="openPetModal()">🐱</div>
+            <div class="pet-name" id="petName">小考研</div>
+            <div class="pet-level">Lv.5 陪伴喵</div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalDays">0</div>
+                <div class="stat-label">累计天数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalPomodoros">0</div>
+                <div class="stat-label">番茄钟</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalCheckins">0</div>
+                <div class="stat-label">打卡次数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="growthValue">0</div>
+                <div class="stat-label">成长值</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section-title">🌟 核心功能</div>
+            <div class="function-grid">
+                <div class="function-card" onclick="openTimerModal()">
+                    <div class="icon icon-timer">⏱️</div>
+                    <h3>定制番茄钟</h3>
+                    <p>按科目预设，专注学习</p>
+                </div>
+                <div class="function-card" onclick="openPetModal()">
+                    <div class="icon icon-pet">🐱</div>
+                    <h3>学宠陪伴</h3>
+                    <p>切换风格，智能互动</p>
+                </div>
+                <div class="function-card" onclick="openDecisionModal()">
+                    <div class="icon icon-decision">🎁</div>
+                    <h3>决策盒子</h3>
+                    <p>随机决策，烦躁时解闷</p>
+                </div>
+                <div class="function-card" onclick="openMoodModal()">
+                    <div class="icon icon-mood">💭</div>
+                    <h3>情绪树洞</h3>
+                    <p>倾诉心声，情绪识别</p>
+                </div>
+                <div class="function-card" onclick="openCheckinModal()">
+                    <div class="icon icon-checkin">✅</div>
+                    <h3>每日打卡</h3>
+                    <p>绑定计划，积累奖励</p>
+                </div>
+                <div class="function-card" onclick="openGuideModal()">
+                    <div class="icon icon-guide">💝</div>
+                    <h3>情绪引导</h3>
+                    <p>认知调节，缓解焦虑</p>
+                </div>
+            </div>
+
+            <div class="section-title p1-section">🔮 延伸功能</div>
+            <div class="function-grid p1-section">
+                <div class="function-card">
+                    <div class="icon icon-养成">🎮</div>
+                    <h3>学宠养成</h3>
+                    <p>成长值解锁装扮</p>
+                </div>
+                <div class="function-card">
+                    <div class="icon icon-countdown">📅</div>
+                    <h3>考研倒计时</h3>
+                    <p>每日播报剩余天数</p>
+                </div>
+                <div class="function-card">
+                    <div class="icon icon-decision">👯</div>
+                    <h3>考友互动</h3>
+                    <p>串门互赞，送鼓励</p>
+                </div>
+                <div class="function-card">
+                    <div class="icon icon-mood">📚</div>
+                    <h3>知识点抽背</h3>
+                    <p>导入清单随机抽背</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span>首页</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>数据</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>考友</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>我的</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 番茄钟 Modal -->
+    <div class="modal" id="timerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⏱️ 定制番茄钟</h2>
+                <button class="close-btn" onclick="closeModal('timerModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="subject-tags">
+                    <div class="subject-tag active" data-time="25" data-subject="政治">政治 25min</div>
+                    <div class="subject-tag" data-time="30" data-subject="英语">英语 30min</div>
+                    <div class="subject-tag" data-time="45" data-subject="数学">数学 45min</div>
+                    <div class="subject-tag" data-time="30" data-subject="专业课">专业课 30min</div>
+                    <div class="subject-tag" data-time="15" data-subject="复盘">复盘 15min</div>
+                </div>
+                <div class="timer-display">
+                    <div class="timer-circle" id="timerCircle">
+                        <div class="timer-inner">
+                            <div class="timer-time" id="timerTime">25:00</div>
+                            <div class="timer-subject" id="timerSubject">政治</div>
+                        </div>
+                    </div>
+                    <div class="timer-controls">
+                        <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">开始学习</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学宠陪伴 Modal -->
+    <div class="modal" id="petModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🐱 学宠陪伴</h2>
+                <button class="close-btn" onclick="closeModal('petModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="pet-display">
+                    <div class="pet-large">🐱</div>
+                    <div class="pet-name">小考研</div>
+                </div>
+                <div class="style-toggle">
+                    <button class="style-btn active" onclick="setPetStyle('gentle')">🌸 温柔鼓励</button>
+                    <button class="style-btn" onclick="setPetStyle('strict')">🔥 毒舌鞭策</button>
+                </div>
+                <div class="pet-message" id="petMessage">
+                    主人好！今天也要加油学习哦～ 💪<br><br>
+                    我会一直陪在你身边的！
+                </div>
+                <button class="btn btn-primary" style="width:100%" onclick="getPetEncourage()">获取鼓励</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 决策盒子 Modal -->
+    <div class="modal" id="decisionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎁 随机决策盒子</h2>
+                <button class="close-btn" onclick="closeModal('decisionModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <textarea class="decision-input" id="decisionInput" placeholder="输入你纠结的选项，用换行分隔...&#10;例如：&#10;看政治&#10;看英语&#10;刷数学题"></textarea>
+                <button class="btn btn-primary" style="width:100%" onclick="openDecision()">开启决策</button>
+                <div class="decision-result" id="decisionResult">
+                    <div class="emoji">🎯</div>
+                    <div class="text" id="decisionText"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 情绪树洞 Modal -->
+    <div class="modal" id="moodModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💭 情绪树洞</h2>
+                <button class="close-btn" onclick="closeModal('moodModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <textarea class="mood-input" id="moodInput" placeholder="今天有什么想说的吗？可以把心事告诉我～"></textarea>
+                <button class="btn btn-primary" style="width:100%" onclick="analyzeMood()">记录情绪</button>
+                <div class="mood-result" id="moodResult"></div>
+                <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="clearMood()">清空记录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 每日打卡 Modal -->
+    <div class="modal" id="checkinModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✅ 每日打卡</h2>
+                <button class="close-btn" onclick="closeModal('checkinModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="plan-input" id="planInput" placeholder="今日学习计划...">
+                <div class="checkin-calendar" id="checkinCalendar"></div>
+                <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">今日打卡</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 情绪引导 Modal -->
+    <div class="modal" id="guideModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💝 情绪引导</h2>
+                <button class="close-btn" onclick="closeModal('guideModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="emotion-guide">
+                    <h3>🌈 认知调节话术</h3>
+                    <p>焦虑是因为你在乎，紧张是因为你想做得更好。这说明你在正确的道路上前进！</p>
+                </div>
+                <div class="section-title">💪 自我鼓励</div>
+                <div class="encourage-phrases">
+                    <span class="phrase-tag" onclick="showPhrase('我已经很棒了！')">我已经很棒了</span>
+                    <span class="phrase-tag" onclick="showPhrase('每一天都在进步！')">每一天都在进步</span>
+                    <span class="phrase-tag" onclick="showPhrase('坚持就是胜利！')">坚持就是胜利</span>
+                    <span class="phrase-tag" onclick="showPhrase('相信自己可以的！')">相信自己</span>
+                    <span class="phrase-tag" onclick="showPhrase('努力不会被辜负！')">努力不被辜负</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 基础变量定义（必须在最前面）=====
+        
+        // 数据存储
+        var userData = {
+            petStyle: 'gentle',
+            petName: '小考研',
+            petLevel: 1,
+            totalDays: 0,
+            totalPomodoros: 0,
+            totalCheckins: 0,
+            growthValue: 0,
+            checkins: [],
+            moods: []
+        };
+
+        // Supabase 配置
+        var SB_URL = 'https://uiiskmixtbpelljpztro.supabase.co';
+        var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpaXNrbWl4dGJwZWxsanB6dHJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDc3MDEsImV4cCI6MjA5MTUyMzcwMX0.4N07qdb9HTFfkvWbEoA8Mu-DVOxrAb_diiSQDff65p4';
+        var sbClient = null;
+
+        function getSupabaseClient() {
+            if (!sbClient && window.supabase) {
+                sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+            }
+            return sbClient;
+        }
+
+        function getUserId() {
+            var userId = localStorage.getItem('studyPetUserId');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + Date.now();
+                localStorage.setItem('studyPetUserId', userId);
+            }
+            return userId;
+        }
+        
+        var userId = getUserId();
+
+        // 自动创建表（如果不存在）
+        function initDatabase() {
+            fetch(SB_URL + '/rest/v1/user_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SB_KEY,
+                    'Authorization': 'Bearer ' + SB_KEY,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: '_init_',
+                    pet_style: 'gentle',
+                    pet_name: '测试'
+                })
+            }).catch(function() {});
+        }
+        
+        initDatabase();
+
+        // 番茄钟变量
+        var timerInterval = null;
+        var timerTime = 25 * 60;
+        var timerRunning = false;
+        var currentSubject = '政治';
+
+        // 加载数据
+        function loadData() {
+            var saved = localStorage.getItem('studyPetData');
+            if (saved) {
+                userData = JSON.parse(saved);
+            }
+            updateStats();
+            renderCheckinCalendar();
+        }
+
+        // 保存数据（本地 + 云端）
+        function saveData() {
+            localStorage.setItem('studyPetData', JSON.stringify(userData));
+            
+            fetch(SB_URL + '/rest/v1/user_data?on_conflict=user_id', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SB_KEY,
+                    'Authorization': 'Bearer ' + SB_KEY,
+                    'Prefer': 'resolution=merge-duplicates'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    pet_style: userData.petStyle,
+                    pet_name: userData.petName,
+                    total_days: userData.totalDays,
+                    total_pomodoros: userData.totalPomodoros,
+                    total_checkins: userData.totalCheckins,
+                    growth_value: userData.growthValue,
+                    checkins: JSON.stringify(userData.checkins),
+                    moods: JSON.stringify(userData.moods),
+                    updated_at: new Date().toISOString()
+                })
+            })
+            .then(function(res) { return res.text(); })
+            .then(function(text) {
+                if (text.includes('error') || text.includes('Error')) {
+                    alert('⚠️ 本地保存成功，云端同步失败: ' + text);
+                } else {
+                    alert('✅ 数据已保存（本地 + 云端）');
+                }
+            })
+            .catch(function(e) {
+                alert('✅ 数据已保存到本地！');
+            });
+        }
+
+        // 计算学宠等级
+        function calculatePetLevel(growthValue) {
+            if (growthValue >= 500) return 5;
+            if (growthValue >= 300) return 4;
+            if (growthValue >= 150) return 3;
+            if (growthValue >= 50) return 2;
+            return 1;
+        }
+
+        // 更新统计显示
+        function updateStats() {
+            document.getElementById('totalDays').textContent = userData.totalDays;
+            document.getElementById('totalPomodoros').textContent = userData.totalPomodoros;
+            document.getElementById('totalCheckins').textContent = userData.totalCheckins;
+            document.getElementById('growthValue').textContent = userData.growthValue;
+            
+            // 更新学宠等级显示
+            const petLevelNames = ['陪伴喵', '进阶喵', '学霸喵', '考研喵', '上岸喵'];
+            const levelEl = document.querySelector('.pet-level');
+            if (levelEl) {
+                levelEl.textContent = `Lv.${userData.petLevel} ${petLevelNames[userData.petLevel - 1]}`;
+            }
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 模态框控制
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // ===== 番茄钟功能 =====
+
+        function openTimerModal() {
+            openModal('timerModal');
+        }
+
+        document.querySelectorAll('.subject-tag').forEach(function(tag) {
+            tag.addEventListener('click', function() {
+                document.querySelectorAll('.subject-tag').forEach(function(t) { t.classList.remove('active'); });
+                this.classList.add('active');
+                timerTime = parseInt(this.dataset.time) * 60;
+                currentSubject = this.dataset.subject;
+                updateTimerDisplay();
+            });
+        });
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerTime / 60);
+            const seconds = timerTime % 60;
+            document.getElementById('timerTime').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerSubject').textContent = currentSubject;
+            
+            const totalTime = parseInt(document.querySelector('.subject-tag.active').dataset.time) * 60;
+            const progress = ((totalTime - timerTime) / totalTime) * 360;
+            document.getElementById('timerCircle').style.background = 
+                `conic-gradient(var(--accent) ${progress}deg, var(--border) ${progress}deg)`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('startBtn');
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                btn.textContent = '继续学习';
+            } else {
+                timerRunning = true;
+                btn.textContent = '暂停';
+                timerInterval = setInterval(() => {
+                    timerTime--;
+                    updateTimerDisplay();
+                    if (timerTime <= 0) {
+                        clearInterval(timerInterval);
+                        timerRunning = false;
+                        timerComplete();
+                    }
+                    if (timerTime === 60) {
+                        showPetMessage('再坚持1分钟就完成啦！💪');
+                    }
+                }, 1000);
+            }
+        }
+
+        function timerComplete() {
+            userData.totalPomodoros++;
+            userData.growthValue += 10;
+            userData.petLevel = calculatePetLevel(userData.growthValue);
+            saveData();
+            updateStats();
+            showToast('🎉 恭喜完成一个番茄钟！');
+            showPetMessage('太棒了！' + currentSubject + '学习完成！主人辛苦了～ 🌟');
+            document.getElementById('startBtn').textContent = '开始学习';
+            timerTime = parseInt(document.querySelector('.subject-tag.active').dataset.time) * 60;
+            updateTimerDisplay();
+        }
+
+        // ===== 学宠陪伴功能 =====
+        const gentleMessages = [
+            '主人加油！你一定可以的！💪',
+            '今天也很努力呢，我为你骄傲～',
+            '休息一下吧，你已经很棒了！',
+            '相信自己，你一定可以的！',
+            '每一步都在进步呢！',
+            '我永远陪着你一起学习～',
+            '辛苦啦！来抱抱～'
+        ];
+
+        const strictMessages = [
+            '别偷懒！还不快去学习！',
+            '别人都在努力，你呢？',
+            '时间不多了，还敢松懈？',
+            '考上研的人生才精彩！',
+            '现在的努力是为了更好的未来！',
+            '别给自己找借口！',
+            '起来！学习！'
+        ];
+
+        function openPetModal() {
+            openModal('petModal');
+        }
+
+        function setPetStyle(style) {
+            userData.petStyle = style;
+            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            saveData();
+        }
+
+        function getPetEncourage() {
+            const messages = userData.petStyle === 'gentle' ? gentleMessages : strictMessages;
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            showPetMessage(randomMessage);
+        }
+
+        function showPetMessage(message) {
+            document.getElementById('petMessage').innerHTML = message;
+        }
+
+        // ===== 决策盒子功能 =====
+        const decisionEmojis = ['🎯', '⭐', '🌟', '💫', '✨', '🎁'];
+        const decisions = [
+            '就选第一个！相信直觉！',
+            '第二个看起来不错～',
+            '掷硬币决定吧！正面选A，反面选B！',
+            '不要纠结了，先做第一个！',
+            '两个都很好，选哪个都不会后悔！',
+            '抛个骰子，1-3选第一个，4-6选第二个！',
+            '跟随内心，最想选的就是答案！',
+            '给自己1分钟时间，想选哪个就是哪个！'
+        ];
+
+        function openDecisionModal() {
+            openModal('decisionModal');
+            document.getElementById('decisionResult').classList.remove('show');
+            document.getElementById('decisionInput').value = '';
+        }
+
+        function openDecision() {
+            const input = document.getElementById('decisionInput').value.trim();
+            if (!input) {
+                showToast('请输入你的选项～');
+                return;
+            }
+            
+            const options = input.split('\n').filter(o => o.trim());
+            if (options.length < 2) {
+                showToast('请至少输入2个选项～');
+                return;
+            }
+            
+            const randomOption = options[Math.floor(Math.random() * options.length)];
+            const randomEmoji = decisionEmojis[Math.floor(Math.random() * decisionEmojis.length)];
+            const randomDecision = decisions[Math.floor(Math.random() * decisions.length)];
+            
+            document.getElementById('decisionText').innerHTML = 
+                randomEmoji + '<br><strong>' + randomOption + '</strong><br><small>' + randomDecision + '</small>';
+            document.getElementById('decisionResult').classList.add('show');
+            
+            userData.growthValue += 2;
+            userData.petLevel = calculatePetLevel(userData.growthValue);
+            saveData();
+            updateStats();
+        }
+
+        // ===== 情绪树洞功能 =====
+        const positiveKeywords = ['开心', '快乐', '高兴', '满足', '兴奋', '惊喜', '激动', '棒', '好', '不错', '顺利'];
+        const negativeKeywords = ['难过', '伤心', '痛苦', '焦虑', '紧张', '害怕', '担心', '烦', '累', '压力', '崩溃', '绝望', '失落'];
+
+        function openMoodModal() {
+            openModal('moodModal');
+            document.getElementById('moodResult').classList.remove('show');
+            document.getElementById('moodInput').value = '';
+        }
+
+        function analyzeMood() {
+            const text = document.getElementById('moodInput').value.trim();
+            if (!text) {
+                showToast('请输入你的心情～');
+                return;
+            }
+            
+            let positiveCount = 0;
+            let negativeCount = 0;
+            
+            positiveKeywords.forEach(k => { if (text.includes(k)) positiveCount++; });
+            negativeKeywords.forEach(k => { if (text.includes(k)) negativeCount++; });
+            
+            const result = document.getElementById('moodResult');
+            result.classList.remove('positive', 'negative', 'neutral');
+            
+            let mood = '';
+            if (positiveCount > negativeCount) {
+                mood = 'positive';
+                result.innerHTML = '<strong>🌸 检测到正面情绪！</strong><br>你的心情看起来很不错呢～继续保持！学宠为你开心！';
+            } else if (negativeCount > positiveCount) {
+                mood = 'negative';
+                result.innerHTML = '<strong>💙 检测到负面情绪</strong><br>我感受到了你的压力和不安。请记住，你不是一个人！考研路上有我陪你～<br><br>建议：休息一下，出去走走，或者来和学宠聊聊～';
+            } else {
+                mood = 'neutral';
+                result.innerHTML = '<strong>💭 情绪记录已保存</strong><br>今天的状态比较平淡呢～无论是怎样的心情，我都会陪伴着你！';
+            }
+            
+            result.classList.add(mood, 'show');
+            
+            userData.moods.push({ text: text, mood: mood, time: new Date().toISOString() });
+            userData.growthValue += 3;
+            
+            saveData();
+            updateStats();
+        }
+
+        function clearMood() {
+            userData.moods = [];
+            saveData();
+            document.getElementById('moodResult').classList.remove('show');
+            showToast('情绪记录已清空～');
+        }
+
+        // ===== 每日打卡功能 =====
+        function openCheckinModal() {
+            openModal('checkinModal');
+            const today = new Date().toISOString().split('T')[0];
+            const btn = document.getElementById('checkinBtn');
+            if (userData.checkins.includes(today)) {
+                btn.textContent = '✅ 今日已打卡';
+                btn.classList.add('checked');
+            } else {
+                btn.textContent = '今日打卡';
+                btn.classList.remove('checked');
+            }
+        }
+
+        function renderCheckinCalendar() {
+            const calendar = document.getElementById('checkinCalendar');
+            calendar.innerHTML = '';
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // 添加空白
+            for (let i = 0; i < firstDay; i++) {
+                calendar.innerHTML += '<div class="checkin-day"></div>';
+            }
+            
+            // 添加日期
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                let cls = 'checkin-day';
+                if (userData.checkins.includes(dateStr)) cls += ' checked';
+                if (dateStr === todayStr) cls += ' today';
+                calendar.innerHTML += `<div class="${cls}">${d}</div>`;
+            }
+        }
+
+        function doCheckin() {
+            const today = new Date().toISOString().split('T')[0];
+            const plan = document.getElementById('planInput').value.trim();
+            
+            if (userData.checkins.includes(today)) {
+                showToast('今天已经打过卡啦～');
+                return;
+            }
+            
+            userData.checkins.push(today);
+            userData.totalCheckins++;
+            userData.growthValue += 5;
+            userData.petLevel = calculatePetLevel(userData.growthValue);
+            
+            if (userData.totalDays === 0 || !userData.checkins.includes(getYesterday())) {
+                userData.totalDays++;
+            }
+            
+            saveData();
+            updateStats();
+            renderCheckinCalendar();
+            
+            const btn = document.getElementById('checkinBtn');
+            btn.textContent = '✅ 今日已打卡';
+            btn.classList.add('checked');
+            
+            showToast('🎉 打卡成功！连续学习Day ' + userData.totalDays);
+            showPetMessage(`太棒了！今日打卡完成！这是你连续学习的第${userData.totalDays}天啦～ 🌟`);
+        }
+
+        function getYesterday() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            return d.toISOString().split('T')[0];
+        }
+
+        // ===== 情绪引导功能 =====
+        function openGuideModal() {
+            openModal('guideModal');
+        }
+
+        function showPhrase(phrase) {
+            showToast(phrase + ' ✨');
+        }
+
+        // 初始化
+        loadData();
+    </script>
+</body>
+</html>
