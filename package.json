@@ -1,21 +1,11 @@
 {
-  "name": "ai_code",
+  "name": "study-pet-frontend",
   "version": "1.0.0",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "npx serve .",
+    "start": "npx serve ."
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Eav-Tong/shit.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Eav-Tong/shit/issues"
-  },
-  "homepage": "https://github.com/Eav-Tong/shit#readme",
-  "description": ""
+  "dependencies": {},
+  "devDependencies": {}
 }
