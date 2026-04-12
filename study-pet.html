@@ -586,6 +586,47 @@
             font-weight: 500;
         }
 
+        .countdown-display {
+            text-align: center;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .countdown-number {
+            font-size: 72px;
+            font-weight: bold;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .countdown-label {
+            font-size: 18px;
+            color: var(--text);
+            margin-top: 10px;
+        }
+
+        .countdown-date {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+
+        .countdown-placeholder {
+            font-size: 16px;
+            color: var(--text-light);
+            padding: 30px;
+        }
+
+        .countdown-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
         .mood-input {
             width: 100%;
             min-height: 120px;
@@ -842,16 +883,7 @@
                     <h3>决策盒子</h3>
                     <p>随机决策，烦躁时解闷</p>
                 </div>
-            </div>
-
-            <div class="section-title p1-section">🔮 延伸功能</div>
-            <div class="function-grid p1-section">
-                <div class="function-card">
-                    <div class="icon icon-养成">🎮</div>
-                    <h3>学宠养成</h3>
-                    <p>成长值解锁装扮</p>
-                </div>
-                <div class="function-card">
+                <div class="function-card" onclick="openCountdownModal()">
                     <div class="icon icon-countdown">📅</div>
                     <h3>考研倒计时</h3>
                     <p>每日播报剩余天数</p>
@@ -859,24 +891,7 @@
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <div class="nav-item active">
-                <span class="nav-icon">🏠</span>
-                <span>首页</span>
-            </div>
-            <div class="nav-item">
-                <span class="nav-icon">📊</span>
-                <span>数据</span>
-            </div>
-            <div class="nav-item">
-                <span class="nav-icon">👥</span>
-                <span>考友</span>
-            </div>
-            <div class="nav-item">
-                <span class="nav-icon">👤</span>
-                <span>我的</span>
-            </div>
-        </div>
+        <div class="toast" id="toast"></div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -954,6 +969,21 @@
         </div>
     </div>
 
+    <!-- 考研倒计时 Modal -->
+    <div class="modal" id="countdownModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📅 考研倒计时</h2>
+                <button class="close-btn" onclick="closeModal('countdownModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="countdown-display" id="countdownDisplay"></div>
+                <input type="date" class="countdown-input" id="examDateInput">
+                <button class="btn btn-primary" style="width:100%" onclick="setExamDate()">设置考试日期</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 每日打卡 Modal -->
     <div class="modal" id="checkinModal">
         <div class="modal-content">
@@ -999,7 +1029,8 @@
             totalCheckins: 0,
             growthValue: 0,
             checkins: [],
-            moods: []
+            moods: [],
+            examDate: ''
         };
 
         // Supabase 配置
@@ -1417,6 +1448,48 @@
             openModal('decisionModal');
             document.getElementById('decisionResult').classList.remove('show');
             document.getElementById('decisionInput').value = '';
+        }
+
+        function openCountdownModal() {
+            openModal('countdownModal');
+            renderCountdown();
+        }
+
+        function setExamDate() {
+            var examDate = document.getElementById('examDateInput').value;
+            if (!examDate) {
+                showToast('请选择考试日期');
+                return;
+            }
+            userData.examDate = examDate;
+            saveUserData();
+            renderCountdown();
+            showToast('考试日期已设置');
+        }
+
+        function renderCountdown() {
+            var examDate = userData.examDate;
+            var display = document.getElementById('countdownDisplay');
+            var input = document.getElementById('examDateInput');
+            
+            if (examDate) {
+                input.value = examDate;
+                var exam = new Date(examDate);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                exam.setHours(0, 0, 0, 0);
+                var diff = Math.ceil((exam - today) / (1000 * 60 * 60 * 24));
+                
+                if (diff < 0) {
+                    display.innerHTML = '<div class="countdown-number">🎉</div><div class="countdown-label">考试已结束！</div>';
+                } else if (diff === 0) {
+                    display.innerHTML = '<div class="countdown-number">今天</div><div class="countdown-label">就是考试日！加油！💪</div>';
+                } else {
+                    display.innerHTML = '<div class="countdown-number">' + diff + '</div><div class="countdown-label">天后研究生考试</div><div class="countdown-date">' + examDate + '</div>';
+                }
+            } else {
+                display.innerHTML = '<div class="countdown-placeholder">请设置考试日期</div>';
+            }
         }
 
         function openDecision() {
