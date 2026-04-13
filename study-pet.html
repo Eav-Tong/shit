@@ -1058,9 +1058,23 @@
         
         // 自动检测运行环境
         var apiBaseUrl = '';
+        var isLocalEnv = false;
         var currentUrl = window.location.href;
-        if (currentUrl.indexOf('file://') === 0) {
+        if (currentUrl.indexOf('file://') === 0 || currentUrl.indexOf('localhost') !== -1 || currentUrl.indexOf('127.0.0.1') !== -1) {
             apiBaseUrl = 'http://localhost:3001';
+            isLocalEnv = true;
+        }
+
+        // 显示环境提示
+        if (!isLocalEnv) {
+            document.addEventListener('DOMContentLoaded', function() {
+                var banner = document.createElement('div');
+                banner.id = 'envBanner';
+                banner.innerHTML = '⚠️ 当前为演示版本，AI对话功能仅在本地环境可用';
+                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff9800;color:#fff;padding:8px;text-align:center;z-index:10000;font-size:14px;';
+                document.body.insertBefore(banner, document.body.firstChild);
+                document.querySelector('.app-container').style.marginTop = '40px';
+            });
         }
 
         // 自动创建表（如果不存在）
@@ -1350,6 +1364,12 @@
         }
         
         function callDeepSeekAPI(message, callback) {
+            // 非本地环境，不调用AI
+            if (!isLocalEnv) {
+                callback('AI功能暂未上线，请稍后再试\n\n如需体验AI对话，请通过本地服务器运行：\n1. 安装 Node.js\n2. 运行: node server.js\n3. 访问: http://localhost:3001');
+                return;
+            }
+            
             fetch(apiBaseUrl + '/api/ai', {
                 method: 'POST',
                 headers: {
@@ -1371,7 +1391,7 @@
                 }
             })
             .catch(function(e) {
-                callback('请求失败: ' + e.message);
+                callback('AI服务当前不可用（可能未部署后端），请在本地环境运行或稍后再试');
             });
         }
         
