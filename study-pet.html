@@ -627,6 +627,120 @@
             box-sizing: border-box;
         }
 
+        /* 精力管理样式 */
+        .energy-section {
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .energy-section-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .energy-slider {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input#energyLevel {
+            width: 100%;
+            accent-color: var(--accent);
+            height: 8px;
+            border-radius: 10px;
+        }
+
+        .energy-value {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .advice-card {
+            background: linear-gradient(135deg, #f0f7fe, #e6f0fa);
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 16px;
+            border-left: 6px solid var(--accent);
+        }
+
+        .advice-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .quick-btn {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            color: var(--primary);
+        }
+
+        .quick-btn:hover {
+            background: var(--bg);
+            border-color: var(--accent-light);
+        }
+
+        .motivation-quote {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 16px;
+            font-style: italic;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-top: 16px;
+        }
+
+        .stat-item-mini {
+            text-align: center;
+        }
+
+        .stat-number-mini {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .stat-label-mini {
+            font-size: 0.65rem;
+            color: var(--secondary);
+            letter-spacing: 0.3px;
+        }
+
         .mood-input {
             width: 100%;
             min-height: 120px;
@@ -889,6 +1003,41 @@
                     <p>每日播报剩余天数</p>
                 </div>
             </div>
+
+            <!-- 精力管理模块 -->
+            <div class="section-title">⚡ 精力管理</div>
+            <div class="energy-section">
+                <div class="energy-section-title">🔋 当前精力值 <span style="font-size:0.8rem;">(拖拽调节)</span></div>
+                <div class="energy-slider">
+                    <input type="range" id="energyLevel" min="0" max="10" value="5" step="1">
+                    <div class="energy-value">
+                        <span>😴 疲惫枯竭</span>
+                        <span>😐 一般</span>
+                        <span>⚡ 满电爆发</span>
+                    </div>
+                </div>
+                <div class="advice-card">
+                    <div class="advice-text" id="smartAdvice">✨ 拖动滑块，获取专属精力恢复建议 ✨</div>
+                    <div class="quick-actions" id="quickActionPanel">
+                        <!-- 动态推荐按钮 -->
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item-mini">
+                        <div class="stat-number-mini" id="todayTomatoCount">0</div>
+                        <div class="stat-label-mini">今日番茄</div>
+                    </div>
+                    <div class="stat-item-mini">
+                        <div class="stat-number-mini" id="todayFocusMins">0</div>
+                        <div class="stat-label-mini">专注分钟</div>
+                    </div>
+                    <div class="stat-item-mini">
+                        <div class="stat-number-mini" id="energyStatus">✨</div>
+                        <div class="stat-label-mini">即时状态</div>
+                    </div>
+                </div>
+                <div class="motivation-quote" id="motivationQuote">🌙 “休息不是懒惰，是为了跑得更远” — 今天你已经很优秀了</div>
+            </div>
         </div>
 
         <div class="toast" id="toast"></div>
@@ -1111,6 +1260,25 @@
             }
             updateStats();
             renderCheckinCalendar();
+            // 初始化精力管理
+            loadEnergyStats();
+            updateAdviceByEnergy();
+            
+            // 绑定精力滑块事件
+            const energySlider = document.getElementById("energyLevel");
+            if (energySlider) {
+                energySlider.addEventListener("input", updateAdviceByEnergy);
+            }
+            
+            // 夜间温和提示
+            const hour = new Date().getHours();
+            if (hour >= 21 || hour <= 5) {
+                setTimeout(() => {
+                    if(confirm("🌙 现在已经较晚，建议开启休息模式或准备入睡，精力管理比熬夜苦读更重要。点击确定继续使用")){
+                        // 什么也不做
+                    }
+                }, 1000);
+            }
         }
 
         // 保存数据（本地 + 云端）
@@ -1175,7 +1343,184 @@
             }
         }
 
-        // 显示提示
+        // ===== 精力管理功能 =====
+        let todayTomatoCount = 0;
+        let totalFocusMins = 0;
+        const ENERGY_STORAGE_KEY = "EnergyPilot_Stats";
+        
+        function loadEnergyStats() {
+            const stored = localStorage.getItem(ENERGY_STORAGE_KEY);
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    const savedDate = data.date;
+                    const todayStr = new Date().toDateString();
+                    if (savedDate === todayStr) {
+                        todayTomatoCount = data.tomatoCount || 0;
+                        totalFocusMins = data.focusMins || 0;
+                    } else {
+                        todayTomatoCount = 0;
+                        totalFocusMins = 0;
+                        saveEnergyStats();
+                    }
+                } catch(e) { resetEnergyStats(); }
+            } else {
+                resetEnergyStats();
+            }
+            updateEnergyStatsUI();
+        }
+        
+        function resetEnergyStats() {
+            todayTomatoCount = 0;
+            totalFocusMins = 0;
+            saveEnergyStats();
+        }
+        
+        function saveEnergyStats() {
+            const todayStr = new Date().toDateString();
+            const data = {
+                date: todayStr,
+                tomatoCount: todayTomatoCount,
+                focusMins: totalFocusMins
+            };
+            localStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify(data));
+        }
+        
+        function addCompletedEnergyPomodoro() {
+            todayTomatoCount++;
+            totalFocusMins += 25;
+            saveEnergyStats();
+            updateEnergyStatsUI();
+            updateMotivationalQuoteByEnergy();
+        }
+        
+        function updateEnergyStatsUI() {
+            const tomatoEl = document.getElementById("todayTomatoCount");
+            const focusEl = document.getElementById("todayFocusMins");
+            if (tomatoEl) tomatoEl.innerText = todayTomatoCount;
+            if (focusEl) focusEl.innerText = totalFocusMins;
+        }
+        
+        // 根据精力值获取建议文本和推荐操作 (0~10)
+        function getEnergyAdvice(energy) {
+            if (energy <= 2) {
+                return {
+                    text: "⚠️ 极度疲劳！大脑已超负荷。别强行学习了，立即休息20分钟或小睡一会儿。",
+                    actions: ["💤 闭眼深呼吸5分钟", "🚰 喝一大杯温水", "🧊 冷水洗脸", "🌙 暂时趴桌小睡15分钟"]
+                };
+            } else if (energy <= 4) {
+                return {
+                    text: "😟 精力明显不足，效率极低。来个快速充能：轻量活动+短休。",
+                    actions: ["🧘 肩颈拉伸2分钟", "🚶 走动3分钟", "🥤 饮用半杯电解质水", "🎧 听1首纯音乐"]
+                };
+            } else if (energy <= 6) {
+                return {
+                    text: "😐 状态普通，容易走神。建议番茄工作法 + 5分钟冥想唤醒。",
+                    actions: ["🍅 开启一个番茄钟（帮你聚焦）", "🧠 闭眼回忆今日笔记", "💧 眼部按摩", "📋 写下3件优先任务"]
+                };
+            } else if (energy <= 8) {
+                return {
+                    text: "👍 精力尚可，适合中等难度任务。保持节奏，避免久坐。",
+                    actions: ["📌 做10道选择题", "✍️ 画一张思维导图", "💪 站立学习或拉伸", "🍎 吃个小水果"]
+                };
+            } else {
+                return {
+                    text: "⚡⚡ 满电爆发！把握黄金时刻，攻克最难的科目！但要警惕过耗，每50分钟休息一下。",
+                    actions: ["🚀 攻克线代大题", "📈 刷一套真题", "🎯 挑战高难度概念", "🌿 提醒：别忘喝水"]
+                };
+            }
+        }
+        
+        function updateAdviceByEnergy() {
+            const energySlider = document.getElementById("energyLevel");
+            const adviceTextSpan = document.getElementById("smartAdvice");
+            const quickPanel = document.getElementById("quickActionPanel");
+            
+            if (!energySlider || !adviceTextSpan || !quickPanel) return;
+            
+            const val = parseInt(energySlider.value, 10);
+            const advice = getEnergyAdvice(val);
+            adviceTextSpan.innerHTML = `💡 ${advice.text}`;
+            
+            quickPanel.innerHTML = "";
+            advice.actions.forEach(action => {
+                const btn = document.createElement("button");
+                btn.className = "quick-btn";
+                btn.innerText = action;
+                btn.addEventListener("click", () => {
+                    if (action.includes("番茄钟") || action.includes("开启一个番茄钟")) {
+                        openTimerModal();
+                        showToast("🍅 番茄钟已启动！专注25分钟~");
+                    } else if (action.includes("闭眼深呼吸") || action.includes("拉伸") || action.includes("走动") || action.includes("洗脸") || action.includes("喝水")) {
+                        showToast(`✅ 好习惯：${action} 能快速提升大脑供血！`);
+                        if (action.includes("拉伸")) {
+                            setTimeout(() => showToast("👍 拉伸完成！身体放松了些吧？继续加油~"), 3000);
+                        }
+                    } else if (action.includes("小睡")) {
+                        showToast("😴 设定15分钟闹钟，小睡后重启大脑！");
+                    } else if (action.includes("站立")) {
+                        showToast("🧍 站起来学习效率+15%，试试看～");
+                    } else {
+                        showToast(`✨ 执行「${action}」: 专注当下状态会改善！`);
+                    }
+                });
+                quickPanel.appendChild(btn);
+            });
+            
+            const stateSpan = document.getElementById("energyStatus");
+            if (stateSpan) {
+                if (val <= 3) stateSpan.innerHTML = "🆘";
+                else if (val <= 5) stateSpan.innerHTML = "🌿";
+                else if (val <= 7) stateSpan.innerHTML = "📖";
+                else stateSpan.innerHTML = "⚡";
+            }
+            
+            updateMotivationalQuoteByEnergy(val);
+        }
+        
+        function showTemporaryAdvice(msg) {
+            const adviceTextSpan = document.getElementById("smartAdvice");
+            if (!adviceTextSpan) return;
+            const original = adviceTextSpan.innerHTML;
+            adviceTextSpan.innerHTML = `✨ ${msg}`;
+            setTimeout(() => {
+                const energySlider = document.getElementById("energyLevel");
+                if (energySlider) {
+                    const currentVal = parseInt(energySlider.value, 10);
+                    const freshAdvice = getEnergyAdvice(currentVal);
+                    adviceTextSpan.innerHTML = `💡 ${freshAdvice.text}`;
+                }
+            }, 2500);
+        }
+        
+        function updateMotivationalQuoteByEnergy(energy = null) {
+            const energySlider = document.getElementById("energyLevel");
+            const quoteEl = document.getElementById("motivationQuote");
+            if (!quoteEl) return;
+            
+            let val = (energy !== null) ? energy : (energySlider ? parseInt(energySlider.value, 10) : 5);
+            
+            const quotes = [
+                "🌱 “学累了就休息，清醒比时长更重要” — 你已经很棒了",
+                "💪 大脑不是机器，休息是最好的学习策略",
+                "🧘 花费5分钟调整呼吸，效率提升30%",
+                "🍃 现在的疲惫是进步的阶梯，但适时停靠才能登顶",
+                "🌟 专注即力量，休息即续航，两者缺一不可",
+                "📖 晚上22点后，睡眠是最高效的投资",
+                "🎯 你今天的专注时长已累积 " + totalFocusMins + " 分钟，为自己骄傲！"
+            ];
+            
+            if (val <= 3) {
+                quoteEl.innerHTML = "🛌 别硬撑了，立即休息，明天才能继续战斗。你已经尽力了，考研是马拉松。";
+            } else if (val <= 5) {
+                quoteEl.innerHTML = "🌙 “中场休息不是放弃，是战术调整” 试试闭眼深呼吸2分钟。";
+            } else {
+                let idx = Math.floor(Math.random() * quotes.length);
+                quoteEl.innerHTML = quotes[idx];
+            }
+        }
+        
+        // ===== 显示提示 =====
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -1254,6 +1599,8 @@
             userData.petLevel = calculatePetLevel(userData.growthValue);
             saveData();
             updateStats();
+            // 更新精力管理统计
+            addCompletedEnergyPomodoro();
             showToast('🎉 恭喜完成一个番茄钟！');
             showPetMessage('太棒了！' + currentSubject + '学习完成！主人辛苦了～ 🌟');
             document.getElementById('startBtn').textContent = '开始学习';
